@@ -173,45 +173,45 @@
 
   		  var geometry2 = new THREE.Geometry();
         geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
-        // geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
+        geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
 
 
-        directionVector.set(xs-i.point.x, ys-i.point.y, zs-i.point.z);
+        // directionVector.set(xs-i.point.x, ys-i.point.y, zs-i.point.z);
 
-        raycaster.set(i.position, directionVector);
-        var intersects = raycaster.raycast(objects);
+        // raycaster.set(i.position, directionVector);
+        // var intersects = raycaster.raycast(objects);
 
-        if (intersects.length) {
+        // if (intersects.length) {
           
-          geometry2.vertices.push(new THREE.Vector3( intersects[0].point.x, intersects[0].point.y, intersects[0].point.z) );
-          while (intersects.length) {
+        //   geometry2.vertices.push(new THREE.Vector3( intersects[0].point.x, intersects[0].point.y, intersects[0].point.z) );
+        //   while (intersects.length) {
 
 
-            Xi1 = Math.random();
-            Xi2 = Math.random();
+        //     Xi1 = Math.random();
+        //     Xi2 = Math.random();
 
-            theta = Math.acos(Xi1);
-            phi = 2.0 * Math.PI * Xi2;
+        //     theta = Math.acos(Xi1);
+        //     phi = 2.0 * Math.PI * Xi2;
 
-            xs = Math.sin(theta) * Math.cos(phi) * 10;
-            ys = Math.sin(theta) * Math.sin(phi) * 10;
-            zs = Math.cos(theta) * 10;
+        //     xs = Math.sin(theta) * Math.cos(phi) * 10;
+        //     ys = Math.sin(theta) * Math.sin(phi) * 10;
+        //     zs = Math.cos(theta) * 10;
 
-            directionVector.set(xs-intersects[0].point.x, ys-intersects[0].point.y, zs-intersects[0].point.z);
+        //     directionVector.set(xs-intersects[0].point.x, ys-intersects[0].point.y, zs-intersects[0].point.z);
         
-            raycaster.set(i.position, directionVector);
-            intersects = raycaster.raycast(objects);
-            if (intersects.length) {
-               geometry2.vertices.push(new THREE.Vector3( intersects[0].point.x, intersects[0].point.y, intersects[0].point.z) );
-            } else {
-              geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
-            }
+        //     raycaster.set(i.position, directionVector);
+        //     intersects = raycaster.raycast(objects);
+        //     if (intersects.length) {
+        //        geometry2.vertices.push(new THREE.Vector3( intersects[0].point.x, intersects[0].point.y, intersects[0].point.z) );
+        //     } else {
+        //       geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
+        //     }
 
-          }
+        //   }
 
-        } else {
-          geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
-        }
+        // } else {
+        //   geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
+        // }
 
         var line2 = new THREE.Line(geometry2, material);
         scene.add(line2);
