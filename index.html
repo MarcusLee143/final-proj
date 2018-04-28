@@ -200,9 +200,7 @@
             zs = Math.cos(theta) * 10;
 
             directionVector.set(xs-intersects[0].point.x, ys-intersects[0].point.y, zs-intersects[0].point.z);
-          
-            directionVector.sub(i.position);
-            directionVector.normalize();
+        
             raycaster.set(i.position, directionVector);
             intersects = raycaster.raycast(objects);
             if (intersects.length) {
