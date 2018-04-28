@@ -1,0 +1,185 @@
+<html>
+
+	<head>
+		<title> Three Practice </title>
+		<style>
+			body{margin: 0;}
+			canvas{width:100%; height:100%;}
+		</style>
+	</head>
+
+	<body>
+		<script src="three.js"> </script>
+		<script src="OrbitControls.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			window.addEventListener('resize', function() {
+				var width = window.innerWidth;
+				var height = window.innerHeight;
+				renderer.setSize(width, height);
+				camera.aspect = width/height;
+				camera.updateProjectionMatrix();
+			});
+
+			
+			var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+			var material = new THREE.MeshPhongMaterial( {color: 0xffffff} );
+			var cube = new THREE.Mesh( geometry, material );
+			cube.position.set(0,0,0);
+			scene.add( cube );
+
+			/* Marcus' Material Code Start */
+			// Lambertian BSDF (diffuse)
+			var lambertian_geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+			var lambertian_material = new THREE.MeshLambertMaterial( { color: 0xff0000 } );
+			var lambertian_cube = new THREE.Mesh( lambertian_geometry, lambertian_material );
+			lambertian_cube.position.set(-3,0,0)
+			scene.add( lambertian_cube ); 
+			
+			// Glossy BSDF (focused reflection)
+			var glossy_geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+			var glossy_material = new THREE.MeshPhysicalMaterial( { color: 0x00ff00 } );
+			var glossy_cube = new THREE.Mesh( glossy_geometry, glossy_material );
+			glossy_cube.position.set(-1,0,0)
+			scene.add( glossy_cube );
+
+			// for glass/mirror, lots of good examples here: https://threejs.org/docs/index.html#api/loaders/CubeTextureLoader for desirable effects
+
+			// for reflection/refraction we need an environment map
+			// right now it *works* but it looks hella ugly HAHA
+			// may want to consider mipmap textures
+			var texture_reflect = new THREE.TextureLoader().load( "images/cornell.png" );
+			texture_reflect.mapping = THREE.EquirectangularReflectionMapping;
+			var texture_refract = new THREE.TextureLoader().load( "images/cornell.png" );
+			texture_refract.mapping = THREE.EquirectangularRefractionMapping;
+
+			// Mirror BSDF (complete reflection)
+			// threshold is around <0.2 roughness and >0.7 metalness
+			// Right now the reflection is constant of position, but it should be based off the background
+			var mirror_geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+			var mirror_material = new THREE.MeshPhysicalMaterial( {
+				color: 0xffffff,
+				emissive: 0x0,
+				roughness: 0,
+				metalness: 1,
+				envMap: texture_reflect
+			} );
+			var mirror_cube = new THREE.Mesh( mirror_geometry, mirror_material ); 
+			mirror_cube.position.set(1,0,0)
+			scene.add( mirror_cube ); 
+			
+			// Glass BSDF (reflection + refraction)
+			// threshold is around <0.2 roughness and >0.7 metalness
+			// start with just pure refraction (e.g. https://threejs.org/examples/#webgl_materials_cubemap_refraction) and then work in specularity (e.g. glass glare, like what we had in project 3-2)
+			var glass_geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+			var glass_material = new THREE.MeshPhysicalMaterial( {
+				color: 0xffffff,
+				emissive: 0x0,
+				roughness: 0,
+				metalness: 1,
+				envMap: texture_refract
+			} );
+			var glass_cube = new THREE.Mesh( glass_geometry, glass_material ); 
+			glass_cube.position.set(3,0,0)
+			scene.add( glass_cube ); 
+
+			camera.position.z = 3;
+
+			var ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+			scene.add(ambientLight);
+
+			var light = new THREE.PointLight( 0xff0000, 5, 100 );
+			light.position.set( 0, 3, 0 );
+			scene.add(light)
+
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+			var count = 0;
+
+			var line = 0;
+
+
+			
+			window.onkeydown = function(event){
+
+				var Xi1 = Math.random();
+  				var Xi2 = Math.random();
+
+  				var theta = Math.acos(Xi1);
+  				var phi = 2.0 * Math.PI * Xi2;
+
+  				var xs = Math.sin(theta) * Math.cos(phi) * 10;
+  				var ys = Math.sin(theta) * Math.sin(phi) * 10;
+  				var zs = Math.cos(theta) * 10;
+
+    			if ((event.keyCode === 32) && (count === 0)) {
+        			console.log("hello");
+        			material = new THREE.LineBasicMaterial( { linewidth:10, color: 0x0000ff} );
+					geometry = new THREE.Geometry();
+        			geometry.vertices.push(new THREE.Vector3( camera.position.x, camera.position.y, camera.position.z) );
+        			for (i =0; i < 20; i++) {
+        				if (camera.position.z >= 0) {
+							geometry.vertices.push(new THREE.Vector3( camera.position.x, camera.position.y + ((i%2)/4), camera.position.z - i) );
+        					if ((camera.position.x <= cube.position.x + 1) &&  (camera.position.x >= cube.position.x - 1) && (camera.position.y <= cube.position.y + ((i%2)/4)) &&  (camera.position.y >= cube.position.y - ((i%2)/4)) && (camera.position.z <= cube.position.z + i) &&  (camera.position.z >= cube.position.z - i)) {
+        						
+        						var geometry2 = new THREE.Geometry();
+        						geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
+        						geometry2.vertices.push(new THREE.Vector3( camera.position.x, camera.position.y + ((i%2)/4), camera.position.z - i + 0.5) );
+        						var line2 = new THREE.Line(geometry2, material);
+        						scene.add(line2);
+        						break;
+        					}
+        					
+        				} else {
+        					geometry.vertices.push(new THREE.Vector3( camera.position.x, camera.position.y + ((i%2)/4), camera.position.z - i) );
+        					if ((camera.position.x <= cube.position.x + 1) &&  (camera.position.x >= cube.position.x - 1) && (camera.position.y <= cube.position.y + ((i%2)/4)) &&  (camera.position.y >= cube.position.y - ((i%2)/4)) && (camera.position.z <= cube.position.z + i) &&  (camera.position.z >= cube.position.z - i)) {
+        						var geometry2 = new THREE.Geometry();
+        						geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
+        						geometry2.vertices.push(new THREE.Vector3( camera.position.x, camera.position.y + ((i%2)/4), camera.position.z - i + 0.5) );
+        						var line2 = new THREE.Line(geometry2, material);
+        						scene.add(line2);
+        						break;
+        					}
+        				}
+
+
+        			}
+					var line = new THREE.Line( geometry, material );
+					scene.add( line );
+    			}
+			};
+
+			window.onkeyup = function(event){
+    			if(event.keyCode === 32) {
+
+    				scene.remove( line );
+    			}
+			};
+
+			var update = function() {
+				// cube.rotation.x += .01;
+				// cube.rotation.y += .005;
+			}
+
+			var render = function() {
+
+				renderer.render(scene, camera);
+			}
+
+			var gameloop = function () {
+				requestAnimationFrame(gameloop);
+				update();
+				render();
+			}
+
+			gameloop();
+
+		</script>	
+	</body>
+</html>
