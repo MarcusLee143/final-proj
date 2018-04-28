@@ -173,13 +173,11 @@
 
   		  var geometry2 = new THREE.Geometry();
         geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
+        // geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
 
 
         directionVector.set(xs-i.point.x, ys-i.point.y, zs-i.point.z);
-          
-        directionVector.unproject(i);
-        directionVector.sub(i.position);
-        directionVector.normalize();
+
         raycaster.set(i.position, directionVector);
         var intersects = raycaster.raycast(objects);
 
