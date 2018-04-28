@@ -159,7 +159,7 @@
       var material = new THREE.LineBasicMaterial( { linewidth:10, color: 0x0000ff} );
       var geometry;
 
-      var diffuse = function() {
+      var diffuse = function(i) {
       	var Xi1 = Math.random();
   		  var Xi2 = Math.random();
 
@@ -173,7 +173,7 @@
 
   		  var geometry2 = new THREE.Geometry();
         geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
-        geometry2.vertices.push(new THREE.Vector3( camera.position.x, camera.position.y, camera.position.z + 0.5) );
+        geometry2.vertices.push(new THREE.Vector3( i[0].point.x, i[0].point.y, i[0].point.z + 0.5) );
         var line2 = new THREE.Line(geometry2, material);
         scene.add(line2);
 
@@ -197,7 +197,7 @@
             geometry.vertices.push(new THREE.Vector3( intersects[0].point.x, intersects[0].point.y, intersects[0].point.z ) );
             line = new THREE.Line(geometry, material);
             scene.add(line);
-            diffuse();
+            diffuse(intersects);
 
             console.log(intersects[0].point);
           }
