@@ -39,6 +39,22 @@
 
         cursor: pointer;
       }
+
+
+
+      .button {
+        position:fixed;
+        width:60px;
+        height:60px;
+        bottom:40px;
+        right:40px;
+        background-color:#0C9;
+        color:#FFF;
+        border-radius:50px;
+        text-align:center;
+        box-shadow: 2px 2px 3px #999;
+      }
+
     </style>
   </head>
 
@@ -51,16 +67,37 @@
     <script src="js/enemy.js"></script>
     <script src="js/player.js"></script>
 
+
+
+    <button class="button" onclick="changeRayGun()">
+    </button>
+
+
+
+    <script type="text/javascript"> document.addEventListener('click', function(e) { if(document.activeElement.toString() == '[object HTMLButtonElement]'){ document.activeElement.blur(); } }); </script>
+
     <script>
+      var count = 0;
+      var material = new THREE.LineBasicMaterial({linewidth:10, color: 0x0000ff});
+      function changeRayGun() {
+        if (count % 2 === 0) {
+          material.color.setHex( 0xff0000 );
+        } else {
+          material.color.setHex( 0x0000ff );
+        }
+        count++;
+      }
+
+
       var scene = new THREE.Scene();
       // scene.background = new THREE.Color(0xffffff);
       scene.background = new THREE.CubeTextureLoader().load( [
-                                                      'textures/UnionSquare/posx.jpg',
-                                                      'textures/UnionSquare/negx.jpg',
-                                                      'textures/UnionSquare/posy.jpg',
-                                                      'textures/UnionSquare/negy.jpg',
-                                                      'textures/UnionSquare/posz.jpg',
-                                                      'textures/UnionSquare/negz.jpg'
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg'
                                                     ] );
 
 
@@ -106,85 +143,184 @@
         objects.push(model);
       });
 
-      var loader = new THREE.ColladaLoader(loadingManager);
-      loader.load('./models/gun.dae', function (collada) {
-        model = collada.scene;
-        model.children[1].children[1].material = lambertian_material;
-        model.raycastMaterial = lambertian_material;
-      });
 
-      var loadingManager2 = new THREE.LoadingManager(function() {
-        scene.add(model);
-        objects.push(model);
-      });
 
-      var loader2 = new THREE.ColladaLoader(loadingManager2);
-      loader2.load('./models/figure.dae', function (collada) {
-        model = collada.scene;
-        model.children[1].material = lambertian_material;
-        model.raycastMaterial = lambertian_material;
-      });
 
-      var loadingManager3 = new THREE.LoadingManager(function() {
-        model.position.x -= 10;
-        scene.add(model);
-        objects.push(model);
-      });
 
-      var loader3 = new THREE.ColladaLoader(loadingManager3);
-      loader3.load('./models/enemy1.dae', function (collada) {
-        model = collada.scene;
-        model.children[1].children[1].material = lambertian_material;
-        model.raycastMaterial = lambertian_material;
-      });
 
-      var loadingManager4 = new THREE.LoadingManager(function() {
-        model.position.x += 10;
-        model.position.y += 10;
-        model.rotation.z += Math.PI / 2;
-        scene.add(model);
-        objects.push(model);
-      });
+      var end_x;
+      var end_z;
 
-      var loader4 = new THREE.ColladaLoader(loadingManager4);
-      loader4.load('./models/gun2.dae', function (collada) {
-        model = collada.scene;
-        model.children[1].children[1].material = glossy_material;
-        model.raycastMaterial = glossy_material;
-      });
+      var arena = function (N) {
+        var floorGeometry = new THREE.CubeGeometry(N, 1, N);
+        var floorMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var floorCube = new THREE.Mesh(floorGeometry, floorMaterial);
+        floorCube.position.y = -1;
+        
 
-      var loadingManager5 = new THREE.LoadingManager(function() {
-        model.position.y += 10;
-        model.rotation.z += Math.PI / 2;
-        scene.add(model);
-        objects.push(model);
-      });
 
-      var loader5 = new THREE.ColladaLoader(loadingManager5);
-      loader5.load('./models/chest.dae', function (collada) {
-        model = collada.scene;
-        model.children[2].material = glossy_material;
-        model.raycastMaterial = glossy_material;
-      });
+        scene.add(floorCube);
 
-      var loadingManager6 = new THREE.LoadingManager(function() {
-        model.position.x -= 10;
-        model.position.y += 10;
-        scene.add(model);
-        objects.push(model);
-      });
+        var leftWallGeometry = new THREE.CubeGeometry(1, N/4, N);
+        var leftWallMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var leftWallCube = new THREE.Mesh(leftWallGeometry, leftWallMaterial);
+        leftWallCube.position.x = -N/2;
+        leftWallCube.position.y = N/8-1;
+        scene.add(leftWallCube);
 
-      var loader6 = new THREE.ColladaLoader(loadingManager6);
-      loader6.load('./models/potion.dae', function (collada) {
-        model = collada.scene;
-        model.children[2].material = glossy_material;
-        model.raycastMaterial = glossy_material;
-      });
-      
 
-      //var enemy = new THREE.EnemyPrefab(scene);
+        var rightWallGeometry = new THREE.CubeGeometry(1, N/4, N);
+        var rightWallMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var rightWallCube = new THREE.Mesh(rightWallGeometry, rightWallMaterial);
+        rightWallCube.position.x = N/2;
+        rightWallCube.position.y =  N/8-1;
 
-      camera.position.z = 10;
+
+        scene.add(rightWallCube);
+
+
+
+        var rearWallGeometry = new THREE.CubeGeometry(N, N/4, 1);
+        var rearWallMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var rearWallCube = new THREE.Mesh(rearWallGeometry, rearWallMaterial);
+        rearWallCube.position.y =  N/8-1;
+        rearWallCube.position.z = -N/2;
+        scene.add(rearWallCube);
+
+        var frontWallGeometry = new THREE.CubeGeometry(N, N/4, 1);
+        var frontWallMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var frontWallCube = new THREE.Mesh(frontWallGeometry, frontWallMaterial);
+        frontWallCube.position.y =  N/8-1;
+        frontWallCube.position.z = N/2;
+        scene.add(frontWallCube);
+
+
+        camera.position.z = N/2-1;
+        camera.position.y = 4;
+        
+
+
+        var loadingManager1 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader1 = new THREE.ColladaLoader(loadingManager1);
+          loader1.load('./models/enemy1.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+
+
+
+        var loadingManager2 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader2 = new THREE.ColladaLoader(loadingManager2);
+          loader2.load('./models/enemy2.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+
+
+         var loadingManager3 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader3 = new THREE.ColladaLoader(loadingManager3);
+          loader3.load('./models/enemy3.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+
+
+
+        var loadingManager4 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader4 = new THREE.ColladaLoader(loadingManager4);
+          loader4.load('./models/enemy4.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+
+
+         var loadingManager5 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader5 = new THREE.ColladaLoader(loadingManager5);
+          loader5.load('./models/enemy5.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+
+
+
+        var loadingManager6 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader6 = new THREE.ColladaLoader(loadingManager6);
+          loader6.load('./models/enemy6.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+
+
+        var loadingManager7 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  0;
+          model.rotation.z += Math.PI / 2;
+          scene.add(model);
+          objects.push(model);
+          end_x = model.position.x;
+          end_z = model.position.z;
+        });
+
+        var loader7 = new THREE.ColladaLoader(loadingManager7);
+        loader7.load('./models/chest.dae', function (collada) {
+          model = collada.scene;
+          model.children[2].material = glossy_material;
+          model.raycastMaterial = glossy_material;
+        });
+      }
+
+      arena(60);
+
+
 
       var diffuse = function(i) {
       	var Xi1 = Math.random();
@@ -209,7 +345,6 @@
 
       var raycaster = new THREE.ColladaRaycaster();
       var directionVector = new THREE.Vector3();
-      var material = new THREE.LineBasicMaterial({linewidth:10, color: 0x0000ff});
       var geometry;
 
       window.onkeydown = function(event) {
@@ -244,6 +379,12 @@
         //cube.rotation.y += 0.005;
         
         //enemy.setGeometry();
+
+        console.log(Math.floor(camera.position.x));
+        console.log(end_x);
+        if ((Math.round(camera.position.x)=== end_x) && (Math.round(camera.position.z) === end_z + 4)) {
+          location.reload();
+        }
       };
 
       var render = function() {
