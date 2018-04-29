@@ -81,6 +81,10 @@
           console.error( 'An error happened.' );
         }
       );
+
+      loader.wrapS = THREE.RepeatWrapping;
+      loader.wrapT = THREE.RepeatWrapping;
+      loader.repeat.set( 4, 4 );
       // scene.background = new THREE.Color(0xffffff);
       scene.background = loader;
 
