@@ -91,6 +91,30 @@
         camera.updateProjectionMatrix();
       });
 
+      // Mirror BSDF (complete reflection)
+      var mirror_geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+      var mirror_material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        envMap: scene.background
+      } );
+      var mirror_sphere = new THREE.Mesh( mirror_geometry, mirror_material ); 
+      mirror_sphere.position.set(1,0,0)
+      scene.add( mirror_sphere ); 
+      
+      // Glass BSDF (reflection + refraction)
+      // var glass_geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+      // var glass_material = new THREE.MeshPhysicalMaterial( {
+      //   color: 0xffffff,
+      //   emissive: 0x0,
+      //   roughness: 0,
+      //   metalness: 1,
+      //   envMap: texture_refract
+      // } );
+      // glass_material.envMap.mapping = THREE.CubeRefractionMapping;  
+      // var glass_sphere = new THREE.Mesh( glass_geometry, glass_material ); 
+      // glass_sphere.position.set(3,0,0)
+      // scene.add( glass_sphere ); 
+
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       //controls = new THREE.FirstPersonControls(camera, renderer.domElement);
 
