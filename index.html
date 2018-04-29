@@ -165,50 +165,51 @@
       var material = new THREE.LineBasicMaterial( { linewidth:10, color: 0x0000ff} );
       var geometry;
 
-      var diffuse = function(i) {
-      	var Xi1 = Math.random();
-  		  var Xi2 = Math.random();
+      window.onkeydown = function(event) {
+        if(event.keyCode === 32) {
+          directionVector.set(0, 0, 1);
+            
+          directionVector.unproject(camera);
+          directionVector.sub(camera.position);
+          directionVector.normalize();
+          raycaster.set(camera.position, directionVector);
+          recurseRaycast(raycaster);
+        }
+      }
 
-  		  var theta = Math.acos(Xi1);
-  		  var phi = 2.0 * Math.PI * Xi2;
+      var recurseRaycast = function(raycaster) {
+        var intersects = raycaster.raycast(objects);
+        console.log('ray shot');
+        if(intersects.length) {
+          geometry = new THREE.Geometry();
+          geometry.vertices.push(new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z));
+          geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
+          line = new THREE.Line(geometry, material);
+          scene.add(line);
 
-  		  var xs = Math.sin(theta) * Math.cos(phi) * 10;
-  		  var ys = Math.sin(theta) * Math.sin(phi) * 10;
-  		  var zs = Math.cos(theta) * 10;
+          calculateSecondaryRay(intersects[0]);
+        }
+      }
+
+      var calculateSecondaryRay = function(i) {
+        var Xi1 = Math.random();
+        var Xi2 = Math.random();
+
+        var theta = Math.acos(Xi1);
+        var phi = 2.0 * Math.PI * Xi2;
+
+        var xs = Math.sin(theta) * Math.cos(phi) * 10;
+        var ys = Math.sin(theta) * Math.sin(phi) * 10;
+        var zs = Math.cos(theta) * 10;
 
 
-  		  var geometry2 = new THREE.Geometry();
-        geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
+        var geometry2 = new THREE.Geometry();
+        geometry2.vertices.push(new THREE.Vector3(i.point.x, i.point.y, i.point.z));
         geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
 
         var line2 = new THREE.Line(geometry2, material);
         scene.add(line2);
 
-      }
-
-      window.onkeydown = function(event) {
-
-        directionVector.set(0, 0, 1);
-          
-        directionVector.unproject(camera);
-        directionVector.sub(camera.position);
-        directionVector.normalize();
-        raycaster.set(camera.position, directionVector);
-        var intersects = raycaster.raycast(objects);
-        console.log('ray shot');
-
-        if(event.keyCode === 32) {
-          if(intersects.length) {
-            geometry = new THREE.Geometry();
-            geometry.vertices.push(new THREE.Vector3( camera.position.x, camera.position.y, camera.position.z) );
-            geometry.vertices.push(new THREE.Vector3( intersects[0].point.x, intersects[0].point.y, intersects[0].point.z ) );
-            line = new THREE.Line(geometry, material);
-            scene.add(line);
-            diffuse(intersects[0]);
-
-            console.log(intersects[0].point);
-          }
-        }
       }
 
       var update = function() {
