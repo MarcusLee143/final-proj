@@ -90,36 +90,32 @@
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
       });
-
-      // Mirror BSDF (complete reflection)
-      var mirror_geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
-      var mirror_material = new THREE.MeshBasicMaterial( {
-        color: 0xffffff,
-        envMap: scene.background
-      } );
-      var mirror_sphere = new THREE.Mesh( mirror_geometry, mirror_material ); 
-      mirror_sphere.position.set(1,0,0)
-      scene.add( mirror_sphere ); 
       
-      // Glass BSDF (reflection + refraction)
-      // var glass_geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
-      // var glass_material = new THREE.MeshPhysicalMaterial( {
-      //   color: 0xffffff,
-      //   emissive: 0x0,
-      //   roughness: 0,
-      //   metalness: 1,
-      //   envMap: texture_refract
-      // } );
-      // glass_material.envMap.mapping = THREE.CubeRefractionMapping;  
-      // var glass_sphere = new THREE.Mesh( glass_geometry, glass_material ); 
-      // glass_sphere.position.set(3,0,0)
-      // scene.add( glass_sphere ); 
-
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       //controls = new THREE.FirstPersonControls(camera, renderer.domElement);
 
       var lambertian_material = new THREE.MeshLambertMaterial({color: 0xff0000});
       var glossy_material = new THREE.MeshPhysicalMaterial({color: 0x00ff00});
+      var mirror_material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        envMap: scene.background
+      } );
+
+      var glass_texture = new THREE.CubeTextureLoader().load( [
+                                                      'textures/UnionSquare/posx.jpg',
+                                                      'textures/UnionSquare/negx.jpg',
+                                                      'textures/UnionSquare/posy.jpg',
+                                                      'textures/UnionSquare/negy.jpg',
+                                                      'textures/UnionSquare/posz.jpg',
+                                                      'textures/UnionSquare/negz.jpg'
+                                                    ] );
+      glass_texture.mapping = THREE.CubeRefractionMapping;
+      var glass_material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        envMap: glass_texture,
+        refractionRatio: 0.9
+      } );
+      
 
       var objects = [];
 
@@ -145,8 +141,8 @@
       var loader2 = new THREE.ColladaLoader(loadingManager2);
       loader2.load('./models/figure.dae', function (collada) {
         model = collada.scene;
-        model.children[1].material = lambertian_material;
-        model.raycastMaterial = lambertian_material;
+        model.children[1].material = mirror_material;
+        model.raycastMaterial = mirror_material;
       });
 
       var loadingManager3 = new THREE.LoadingManager(function() {
@@ -158,8 +154,8 @@
       var loader3 = new THREE.ColladaLoader(loadingManager3);
       loader3.load('./models/enemy1.dae', function (collada) {
         model = collada.scene;
-        model.children[1].children[1].material = lambertian_material;
-        model.raycastMaterial = lambertian_material;
+        model.children[1].children[1].material = glass_material;
+        model.raycastMaterial = glass_material;
       });
 
       var loadingManager4 = new THREE.LoadingManager(function() {
