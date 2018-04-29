@@ -127,12 +127,32 @@
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
       });
-
+      
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       //controls = new THREE.FirstPersonControls(camera, renderer.domElement);
 
       var lambertian_material = new THREE.MeshLambertMaterial({color: 0xff0000});
       var glossy_material = new THREE.MeshPhysicalMaterial({color: 0x00ff00});
+      var mirror_material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        envMap: scene.background
+      } );
+
+      var glass_texture = new THREE.CubeTextureLoader().load( [
+                                                      'textures/UnionSquare/posx.jpg',
+                                                      'textures/UnionSquare/negx.jpg',
+                                                      'textures/UnionSquare/posy.jpg',
+                                                      'textures/UnionSquare/negy.jpg',
+                                                      'textures/UnionSquare/posz.jpg',
+                                                      'textures/UnionSquare/negz.jpg'
+                                                    ] );
+      glass_texture.mapping = THREE.CubeRefractionMapping;
+      var glass_material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        envMap: glass_texture,
+        refractionRatio: 0.9
+      } );
+      
 
       var objects = [];
 
@@ -142,10 +162,6 @@
         scene.add(model);
         objects.push(model);
       });
-
-
-
-
 
 
       var end_x;
