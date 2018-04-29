@@ -110,7 +110,6 @@
       loader.load('./models/gun.dae', function (collada) {
         model = collada.scene;
         model.children[1].children[1].material = lambertian_material;
-        model.raycastMaterial = lambertian_material;
       });
 
       var loadingManager2 = new THREE.LoadingManager(function() {
@@ -122,7 +121,6 @@
       loader2.load('./models/figure.dae', function (collada) {
         model = collada.scene;
         model.children[1].material = lambertian_material;
-        model.raycastMaterial = lambertian_material;
       });
 
       var loadingManager3 = new THREE.LoadingManager(function() {
@@ -135,7 +133,6 @@
       loader3.load('./models/enemy1.dae', function (collada) {
         model = collada.scene;
         model.children[1].children[1].material = lambertian_material;
-        model.raycastMaterial = lambertian_material;
       });
 
       var loadingManager4 = new THREE.LoadingManager(function() {
@@ -150,7 +147,6 @@
       loader4.load('./models/gun2.dae', function (collada) {
         model = collada.scene;
         model.children[1].children[1].material = glossy_material;
-        model.raycastMaterial = glossy_material;
       });
 
       var loadingManager5 = new THREE.LoadingManager(function() {
@@ -164,7 +160,6 @@
       loader5.load('./models/chest.dae', function (collada) {
         model = collada.scene;
         model.children[2].material = glossy_material;
-        model.raycastMaterial = glossy_material;
       });
 
       var loadingManager6 = new THREE.LoadingManager(function() {
@@ -178,34 +173,12 @@
       loader6.load('./models/potion.dae', function (collada) {
         model = collada.scene;
         model.children[2].material = glossy_material;
-        model.raycastMaterial = glossy_material;
       });
       
 
       //var enemy = new THREE.EnemyPrefab(scene);
 
       camera.position.z = 10;
-
-      var diffuse = function(i) {
-      	var Xi1 = Math.random();
-  		  var Xi2 = Math.random();
-
-  		  var theta = Math.acos(Xi1);
-  		  var phi = 2.0 * Math.PI * Xi2;
-
-  		  var xs = Math.sin(theta) * Math.cos(phi) * 10;
-  		  var ys = Math.sin(theta) * Math.sin(phi) * 10;
-  		  var zs = Math.cos(theta) * 10;
-
-
-  		  var geometry2 = new THREE.Geometry();
-        geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
-        geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
-
-        var line2 = new THREE.Line(geometry2, material);
-        scene.add(line2);
-
-      }
 
       var raycaster = new THREE.ColladaRaycaster();
       var directionVector = new THREE.Vector3();
@@ -233,10 +206,36 @@
           geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
           line = new THREE.Line(geometry, material);
           scene.add(line);
-          diffuse(intersects[0]);
+          if(intersects[0].object.material == lambertian_material)
+            diffuse(intersects[0]);
         } else {
-
+          geometry = new THREE.Geometry();
+          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
+          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x + 100 * raycaster.ray.direction.x, raycaster.ray.origin.y + 100 * raycaster.ray.direction.y, raycaster.ray.origin.z + 100 * raycaster.ray.direction.z));
+          line = new THREE.Line(geometry, material);
+          scene.add(line);
         }
+      }
+
+      var diffuse = function(i) {
+        var Xi1 = Math.random();
+        var Xi2 = Math.random();
+
+        var theta = Math.acos(Xi1);
+        var phi = 2.0 * Math.PI * Xi2;
+
+        var xs = Math.sin(theta) * Math.cos(phi) * 10;
+        var ys = Math.sin(theta) * Math.sin(phi) * 10;
+        var zs = Math.cos(theta) * 10;
+
+
+        var geometry2 = new THREE.Geometry();
+        geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
+        geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
+
+        var line2 = new THREE.Line(geometry2, material);
+        scene.add(line2);
+
       }
 
       var update = function() {
