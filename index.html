@@ -80,6 +80,9 @@
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       //controls = new THREE.FirstPersonControls(camera, renderer.domElement);
 
+      var lambertian_material = new THREE.MeshLambertMaterial({color: 0xff0000});
+      var glossy_material = new THREE.MeshPhysicalMaterial({color: 0x00ff00});
+
       var objects = [];
 
       var loadingManager = new THREE.LoadingManager(function() {
@@ -92,6 +95,8 @@
       var loader = new THREE.ColladaLoader(loadingManager);
       loader.load('./models/gun.dae', function (collada) {
         model = collada.scene;
+        model.children[1].children[1].material = lambertian_material;
+        model.raycastMaterial = lambertian_material;
       });
 
       var loadingManager2 = new THREE.LoadingManager(function() {
@@ -102,6 +107,8 @@
       var loader2 = new THREE.ColladaLoader(loadingManager2);
       loader2.load('./models/figure.dae', function (collada) {
         model = collada.scene;
+        model.children[1].material = lambertian_material;
+        model.raycastMaterial = lambertian_material;
       });
 
       var loadingManager3 = new THREE.LoadingManager(function() {
@@ -113,6 +120,8 @@
       var loader3 = new THREE.ColladaLoader(loadingManager3);
       loader3.load('./models/enemy1.dae', function (collada) {
         model = collada.scene;
+        model.children[1].children[1].material = lambertian_material;
+        model.raycastMaterial = lambertian_material;
       });
 
       var loadingManager4 = new THREE.LoadingManager(function() {
@@ -126,6 +135,8 @@
       var loader4 = new THREE.ColladaLoader(loadingManager4);
       loader4.load('./models/gun2.dae', function (collada) {
         model = collada.scene;
+        model.children[1].children[1].material = glossy_material;
+        model.raycastMaterial = glossy_material;
       });
 
       var loadingManager5 = new THREE.LoadingManager(function() {
@@ -138,6 +149,8 @@
       var loader5 = new THREE.ColladaLoader(loadingManager5);
       loader5.load('./models/chest.dae', function (collada) {
         model = collada.scene;
+        model.children[2].material = glossy_material;
+        model.raycastMaterial = glossy_material;
       });
 
       var loadingManager6 = new THREE.LoadingManager(function() {
@@ -150,6 +163,8 @@
       var loader6 = new THREE.ColladaLoader(loadingManager6);
       loader6.load('./models/potion.dae', function (collada) {
         model = collada.scene;
+        model.children[2].material = glossy_material;
+        model.raycastMaterial = glossy_material;
       });
       
 
@@ -157,9 +172,30 @@
 
       camera.position.z = 10;
 
+      var diffuse = function(i) {
+      	var Xi1 = Math.random();
+  		  var Xi2 = Math.random();
+
+  		  var theta = Math.acos(Xi1);
+  		  var phi = 2.0 * Math.PI * Xi2;
+
+  		  var xs = Math.sin(theta) * Math.cos(phi) * 10;
+  		  var ys = Math.sin(theta) * Math.sin(phi) * 10;
+  		  var zs = Math.cos(theta) * 10;
+
+
+  		  var geometry2 = new THREE.Geometry();
+        geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
+        geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
+
+        var line2 = new THREE.Line(geometry2, material);
+        scene.add(line2);
+
+      }
+
       var raycaster = new THREE.ColladaRaycaster();
       var directionVector = new THREE.Vector3();
-      var material = new THREE.LineBasicMaterial( { linewidth:10, color: 0x0000ff} );
+      var material = new THREE.LineBasicMaterial({linewidth:10, color: 0x0000ff});
       var geometry;
 
       window.onkeydown = function(event) {
@@ -179,34 +215,14 @@
         console.log('ray shot');
         if(intersects.length) {
           geometry = new THREE.Geometry();
-          geometry.vertices.push(new THREE.Vector3(camera.position.x, camera.position.y, camera.position.z));
+          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
           geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
           line = new THREE.Line(geometry, material);
           scene.add(line);
+          diffuse(intersects[0]);
+        } else {
 
-          calculateSecondaryRay(intersects[0]);
         }
-      }
-
-      var calculateSecondaryRay = function(i) {
-        var Xi1 = Math.random();
-        var Xi2 = Math.random();
-
-        var theta = Math.acos(Xi1);
-        var phi = 2.0 * Math.PI * Xi2;
-
-        var xs = Math.sin(theta) * Math.cos(phi) * 10;
-        var ys = Math.sin(theta) * Math.sin(phi) * 10;
-        var zs = Math.cos(theta) * 10;
-
-
-        var geometry2 = new THREE.Geometry();
-        geometry2.vertices.push(new THREE.Vector3(i.point.x, i.point.y, i.point.z));
-        geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
-
-        var line2 = new THREE.Line(geometry2, material);
-        scene.add(line2);
-
       }
 
       var update = function() {
