@@ -55,6 +55,16 @@
         box-shadow: 2px 2px 3px #999;
       }
 
+
+      #times {
+        position:fixed;
+        width:150px;
+        height:60px;
+        text-align:center;
+        font-size: 30px;
+        color: red;
+      }
+
     </style>
   </head>
 
@@ -76,7 +86,32 @@
 
     <script type="text/javascript"> document.addEventListener('click', function(e) { if(document.activeElement.toString() == '[object HTMLButtonElement]'){ document.activeElement.blur(); } }); </script>
 
+    <div id ="times"> TIME: 60s</div>
+
     <script>
+
+
+
+      alert("Vanquish all enemys and retrieve the case to win! To destroy an enemy you must use the respective gun that corresponds to the enemy otherwise rays will be reflected. CONTROLS {forward: up, backward: down, right: right, left: left, switch gun: click green button}");
+
+      function gameLost() {
+        alert("Time has run out, You lose!");
+        location.reload();
+      }
+      setTimeout(gameLost, 60000);
+
+      var time = 60
+
+      var sub = 1;
+      function updateTime() {
+        document.getElementById('times').innerHTML = "TIME:" + String(time - sub) + "s";
+        sub++;
+      }
+
+      setInterval(updateTime, 1000);
+
+
+
       var count = 0;
       var material = new THREE.LineBasicMaterial({linewidth:10, color: 0x0000ff});
       function changeRayGun() {
@@ -372,32 +407,6 @@
 
       arena(60);
 
-      /* Old code
-      var diffuse = function(i) {
-      	var Xi1 = Math.random();
-  		  var Xi2 = Math.random();
-
-  		  var theta = Math.acos(Xi1);
-  		  var phi = 2.0 * Math.PI * Xi2;
-
-  		  var xs = Math.sin(theta) * Math.cos(phi) * 10;
-  		  var ys = Math.sin(theta) * Math.sin(phi) * 10;
-  		  var zs = Math.cos(theta) * 10;
-
-
-  		  var geometry2 = new THREE.Geometry();
-        geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
-        geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
-
-        var line2 = new THREE.Line(geometry2, material);
-        scene.add(line2);
-
-        setTimeout(function() {
-          console.log("yoooooooo");
-          scene.remove(line2);
-        }, 1000);
-
-      }
 
       var raycaster = new THREE.ColladaRaycaster();
       var directionVector = new THREE.Vector3();
@@ -417,61 +426,14 @@
 
       var recurseRaycast = function(raycaster) {
         var intersects = raycaster.raycast(objects);
-        console.log('ray shot');
-        if(intersects.length) {
-          if (typeof line !== 'undefined') {
-            scene.remove(line);
-          }
-          geometry = new THREE.Geometry();
-          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x + .02, raycaster.ray.origin.y, raycaster.ray.origin.z));
-          geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
-
-
-
-
-          line = new THREE.Line(geometry, material);
-          scene.add(line);
-
-
-          diffuse(intersects[0]);
-          setTimeout(function() {
-            scene.remove(line);
-          }, 1200);
-        } else {
-          geometry = new THREE.Geometry();
-          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
-          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x + 100 * raycaster.ray.direction.x, raycaster.ray.origin.y + 100 * raycaster.ray.direction.y, raycaster.ray.origin.z + 100 * raycaster.ray.direction.z));
-          line = new THREE.Line(geometry, material);
-          scene.add(line);
+        if (typeof line !== 'undefined') {
+          scene.remove(line);
         }
-      }*/
-
-      var raycaster = new THREE.ColladaRaycaster();
-      var directionVector = new THREE.Vector3();
-      var geometry;
-
-      window.onkeydown = function(event) {
-        if(event.keyCode === 32) {
-          directionVector.set(0, 0, 1);
-            
-          directionVector.unproject(camera);
-          directionVector.sub(camera.position);
-          directionVector.normalize();
-          raycaster.set(camera.position, directionVector);
-          recurseRaycast(raycaster);
-        }
-      }
-
-      var recurseRaycast = function(raycaster) {
-        var intersects = raycaster.raycast(objects);
         if(intersects.length) {
-          if (typeof line !== 'undefined') {
-            scene.remove(line);
-          }
           geometry = new THREE.Geometry();
           geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x + 0.02, raycaster.ray.origin.y, raycaster.ray.origin.z));
           geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
-          line = new THREE.Line(geometry, material);
+          var line = new THREE.Line(geometry, material);
           scene.add(line);
           if(intersects[0].object.material == lambertian_material) {
             var newRay = diffuse(intersects[0], raycaster.ray);
@@ -484,9 +446,13 @@
           geometry = new THREE.Geometry();
           geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
           geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x + 100 * raycaster.ray.direction.x, raycaster.ray.origin.y + 100 * raycaster.ray.direction.y, raycaster.ray.origin.z + 100 * raycaster.ray.direction.z));
-          line = new THREE.Line(geometry, material);
+          var line = new THREE.Line(geometry, material);
           scene.add(line);
         }
+
+        setTimeout(function() {
+          scene.remove(line);
+        }, 1200);
       }
 
       var diffuse = function(i, ray) {
@@ -517,9 +483,9 @@
         
         //enemy.setGeometry();
         if ((Math.round(camera.position.x)=== end_x) && (Math.round(camera.position.z) === end_z + 4)) {
+          alert("You win!");
           location.reload();
         }
-
 
         if (objects.length ===  8) {
           var gun = objects[objects.length - 1];
@@ -544,411 +510,6 @@
 
       GameLoop();
       
-
-
-
-
-
-      /*
-      <div id="overlay">
-        <div id="pause">
-          <span style="font-size:30px">PAUSE</span>
-        </div>
-      </div>
-      var scene, camera, controls, renderer;
-      var objects = [];
-      var enemy;
-
-      var player;
-      var character;
-
-      var overlay = document.getElementById('overlay');
-      var pause = document.getElementById('pause');
-
-      var pointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
-
-      if(pointerLock) {
-        var element = document.body;
-
-        var pointerLockChange = function (event) {
-          if(document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element) {
-            enableControls = true;
-            controls.enabled = true;
-            overlay.style.display = 'none';
-          } else {
-            controls.enabled = false;
-            overlay.style.display = 'block';
-            pause.style.display = '';
-          }
-        };
-
-        var pointerLockError = function (event) {
-          pause.style.display = '';
-        }
-
-        var pauseClickEvent = function (event) {
-          pause.style.display = 'none';
-          element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
-          element.requestPointerLock();
-        }
-
-        document.addEventListener('pointerlockchange', pointerLockChange, false);
-        document.addEventListener('mozpointerlockchange', pointerLockChange, false);
-        document.addEventListener('webkitpointerlockchange', pointerLockChange, false);
-
-        document.addEventListener('pointerlockerror', pointerLockError, false);
-        document.addEventListener('mozpointerlockerror', pointerLockError, false);
-        document.addEventListener('webkitpointerlockerror', pointerLockError, false);
-
-        pause.addEventListener('click', pauseClickEvent, false);
-      } else {
-        pause.innerHTML = 'Browser does not support Pointer Lock API';
-      }
-
-      var enableControls = false;
-      var move_forward = false;
-      var move_backward = false;
-      var move_left = false;
-      var move_right = false;
-      var move_jump = false;
-
-      var lastTime = performance.now();
-      var velocity = new THREE.Vector3();
-      var direction = new THREE.Vector3();
-      var vertex = new THREE.Vector3();
-      var color = new THREE.Color();
-
-      start();
-      update();
-
-      function start() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff);
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        var light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
-        light.position.set(0.5, 1, 0.75);
-        scene.add(light);
-
-        // --- Character --- //
-        character = new THREE.Group();
-        scene.add(character);
-        // ----------------- //
-
-        // --- Controls --- //
-        controls = new THREE.PointerLockControls(camera);
-        scene.add(controls.getObject());
-
-        var onKeyDown = function(event) {
-          switch(event.keyCode) {
-            case 87: move_forward = true; break;
-            case 83: move_backward = true; break;
-            case 65: move_left = true; break;
-            case 68: move_right = true; break;
-            case 32: if(move_jump) velocity.y += 75; move_jump = false; break;
-          }
-        };
-
-        var onKeyUp = function(event) {
-          switch(event.keyCode) {
-            case 87: move_forward = false; break;
-            case 83: move_backward = false; break;
-            case 65: move_left = false; break;
-            case 68: move_right = false; break;
-          }
-        };
-
-        document.addEventListener('keydown', onKeyDown, false);
-        document.addEventListener('keyup', onKeyUp, false);
-        // ---------------- //
-
-        // --- Bounding Box Rays --- //
-        raycasterDown = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 1);
-        raycasterFront = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, 1), 0, 1);
-        raycasterBack = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 1);
-        raycasterLeft = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(1, 0, 0), 0, 1);
-        raycasterRight = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(-1, 0, 0), 0, 1);
-        // ------------------------- //
-
-        // --- Floor Object --- //
-        var floorGeometry = new THREE.PlaneBufferGeometry(100, 100, 10, 10);
-        floorGeometry.rotateX(-Math.PI / 2);
-
-        var position = floorGeometry.attributes.position;
-        for(var i = 0; i < position.count; i++) {
-          vertex.fromBufferAttribute(position, i);
-          vertex.x += Math.random() * 2 - 1;
-          vertex.y += Math.random();
-          vertex.z += Math.random() * 2 - 1;
-          position.setXYZ(i, vertex.x, vertex.y, vertex.z);
-        }
-        floorGeometry = floorGeometry.toNonIndexed();
-
-        count = floorGeometry.attributes.position.count;
-        colors = [];
-        for(var i = 0; i < count; i++) {
-          color.setHSL(1, 0, Math.random() * 0.4 + 0.6);
-          colors.push(color.r, color.g, color.b);
-        }
-        floorGeometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        
-        var floorMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors});
-        var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        scene.add(floor);
-        // -------------------- //
-
-        // --- Box Object --- //
-        var boxGeometry = new THREE.BoxBufferGeometry(10, 10, 10);
-        boxGeometry = boxGeometry.toNonIndexed();
-
-        count = boxGeometry.attributes.position.count;
-        colors = [];
-        for (var i = 0; i < count; i++) {
-          color.setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-          colors.push(color.r, color.g, color.b);
-        }
-        boxGeometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        for (var i = 0; i < 10; i++) {
-          var boxMaterial = new THREE.MeshPhongMaterial({specular: 0xffffff, flatShading: true, vertexColors: THREE.VertexColors});
-          boxMaterial.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
-          var box = new THREE.Mesh(boxGeometry, boxMaterial);
-          box.position.x = Math.floor(Math.random() * 10 - 5) * 10;
-          box.position.y = 5;
-          box.position.z = Math.floor(Math.random() * 10 - 5) * 10;
-          scene.add(box);
-          objects.push(box);
-        }
-        // ------------------ //
-
-        // --- Enemy Object --- //
-        enemy = new THREE.EnemyPrefab(scene, 5);
-        // -------------------- //
-
-        // --- Gun Object --- //
-        var gunModel;
-        var loadingManager = new THREE.LoadingManager(function() {
-          gunModel.position.set(5, 5, -5);
-          character.add(gunModel);
-          //scene.add(gunModel);
-        });
-
-        var loader = new THREE.ColladaLoader(loadingManager);
-        loader.load('./models/gun.dae', function (collada) {
-          gunModel = collada.scene;
-        });
-        // ------------------ //
-
-        // --- Player Object --- //
-        player = new THREE.PlayerPrefab(controls.getObject(), gunModel);
-        // --------------------- //
-
-        renderer = new THREE.WebGLRenderer({antialias: true});
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        var onWindowResize = function(event) {
-          var width = window.innerWidth;
-          var height = window.innerHeight;
-          renderer.setSize(width, height);
-          camera.aspect = width / height;
-          camera.updateProjectionMatrix();
-        };
-
-        window.addEventListener('resize', onWindowResize, false);
-      }
-
-      function update() {
-        requestAnimationFrame(update);
-
-        if(enableControls) {
-          var controlObject = controls.getObject();
-          //var controlObject = enemy.enemyPrefab;
-
-          
-          raycaster.ray.origin.copy(controlObject.position);
-
-          var intersections = raycaster.intersectObjects(objects);
-          var onObject = intersections.length > 0;
-          
-
-          var time = performance.now();
-          var deltaTime = (time - lastTime) / 1000;
-
-          velocity.x *= 1 - 10.0 * deltaTime;
-          velocity.z *= 1 - 10.0 * deltaTime;
-          velocity.y -= 9.8 * 25.0 * deltaTime;
-
-          direction.z = Number(move_forward) - Number(move_backward);
-          direction.x = Number(move_left) - Number(move_right);
-          direction.normalize();
-
-          if(move_forward || move_backward) velocity.z -= direction.z * 400.0 * deltaTime;
-          if(move_left || move_right) velocity.x -= direction.x * 400.0 * deltaTime;
-
-          if(checkDownwardCollsion(controlObject) === true) {
-            console.log("collided underneath");
-            velocity.y = Math.max(0, velocity.y);
-            move_jump = true;
-          }
-
-          if(checkForwardCollsion(controlObject) === true) {
-            console.log("collided in front");
-            velocity.z = Math.max(0, velocity.z);
-          }
-
-          if(checkBackwardCollsion(controlObject) === true) {
-            console.log("collided in back");
-            velocity.z = Math.min(0, velocity.z);
-          }
-
-          if(checkLeftwardCollsion(controlObject) === true) {
-            console.log("collided in left");
-            velocity.x = Math.max(0, velocity.x);
-          }
-
-          if(checkRightwardCollsion(controlObject) === true) {
-            console.log("collided in right");
-            velocity.x = Math.min(0, velocity.x);
-          }
-
-          controlObject.translateX(velocity.x * deltaTime);
-          controlObject.translateY(velocity.y * deltaTime);
-          controlObject.translateZ(velocity.z * deltaTime);
-
-          if(controlObject.position.y < 10) {
-            velocity.y = 0;
-            controlObject.position.y = 10;
-            move_jump = true;
-          }
-
-          lastTime = time;
-        }
-
-        character.rotation.set(controlObject.rotation);
-
-        renderer.render(scene, camera);
-      }
-
-      function checkDownwardCollsion(controlObject) {
-        raycasterDown.ray.origin.copy(controlObject.position);
-        raycasterDown.ray.origin.x += 5;
-        raycasterDown.ray.origin.y -= 10;
-        raycasterDown.ray.origin.z += 5;
-
-        var intersections = raycasterDown.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterDown.ray.origin.x -= 10;
-        var intersections = raycasterDown.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterDown.ray.origin.z -= 10;
-        var intersections = raycasterDown.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterDown.ray.origin.x += 10;
-        var intersections = raycasterDown.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        return false;
-      }
-
-      function checkForwardCollsion(controlObject) {
-        raycasterFront.ray.origin.copy(controlObject.position);
-        raycasterFront.ray.origin.x += 5;
-        raycasterFront.ray.origin.y -= 10;
-        raycasterFront.ray.origin.z += 5;
-
-        var intersections = raycasterFront.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterFront.ray.origin.x -= 10;
-        var intersections = raycasterFront.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterFront.ray.origin.y += 15;
-        var intersections = raycasterFront.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterFront.ray.origin.x += 10;
-        var intersections = raycasterFront.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        return false;
-      }
-
-      function checkBackwardCollsion(controlObject) {
-        raycasterBack.ray.origin.copy(controlObject.position);
-        raycasterBack.ray.origin.x += 5;
-        raycasterBack.ray.origin.y -= 10;
-        raycasterBack.ray.origin.z -= 5;
-
-        var intersections = raycasterBack.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterBack.ray.origin.x -= 10;
-        var intersections = raycasterBack.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterBack.ray.origin.y += 15;
-        var intersections = raycasterBack.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterBack.ray.origin.x += 10;
-        var intersections = raycasterBack.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        return false;
-      }
-
-      function checkLeftwardCollsion(controlObject) {
-        raycasterLeft.ray.origin.copy(controlObject.position);
-        raycasterLeft.ray.origin.x += 5;
-        raycasterLeft.ray.origin.y -= 10;
-        raycasterLeft.ray.origin.z += 5;
-
-        var intersections = raycasterLeft.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterLeft.ray.origin.z -= 10;
-        var intersections = raycasterLeft.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterLeft.ray.origin.y += 15;
-        var intersections = raycasterLeft.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterLeft.ray.origin.z += 10;
-        var intersections = raycasterLeft.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        return false;
-      }
-
-      function checkRightwardCollsion(controlObject) {
-        raycasterRight.ray.origin.copy(controlObject.position);
-        raycasterRight.ray.origin.x -= 5;
-        raycasterRight.ray.origin.y -= 10;
-        raycasterRight.ray.origin.z += 5;
-
-        var intersections = raycasterRight.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterRight.ray.origin.z -= 10;
-        var intersections = raycasterRight.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterRight.ray.origin.y += 15;
-        var intersections = raycasterRight.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        raycasterRight.ray.origin.z += 10;
-        var intersections = raycasterRight.intersectObjects(objects);
-        if(intersections.length > 0) return true;
-
-        return false;
-      }
-      */
     </script>
   </body>
 </html>
