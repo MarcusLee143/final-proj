@@ -216,6 +216,8 @@
       
 
       var objects = [];
+      var gun;
+      var chest;
 
       var loadingManager = new THREE.LoadingManager(function() {
         model.position.x += 10;
@@ -276,13 +278,14 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
+          dictionary[model] = 3;
         });
 
         var loader1 = new THREE.ColladaLoader(loadingManager1);
           loader1.load('./models/enemy1.dae', function (collada) {
           model = collada.scene;
           model.children[1].children[1].material = mirror_material;
-          model.raycastMaterial = mirror_material;
+          model.children[1].children[1].hitpoints = 3;
         });
 
 
@@ -293,13 +296,14 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
+          dictionary[model] = 3;
         });
 
         var loader2 = new THREE.ColladaLoader(loadingManager2);
           loader2.load('./models/enemy2.dae', function (collada) {
           model = collada.scene;
           model.children[1].children[1].material = mirror_material;
-          model.raycastMaterial = mirror_material;
+          model.children[1].children[1].hitpoints = 3;
         });
 
 
@@ -309,13 +313,14 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
+          dictionary[model] = 3;
         });
 
         var loader3 = new THREE.ColladaLoader(loadingManager3);
           loader3.load('./models/enemy3.dae', function (collada) {
           model = collada.scene;
           model.children[1].children[1].material = lambertian_material;
-          model.raycastMaterial = lambertian_material;
+          model.children[1].children[1].hitpoints = 3;
         });
 
 
@@ -326,13 +331,14 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
+          dictionary[model] = 3;
         });
 
         var loader4 = new THREE.ColladaLoader(loadingManager4);
           loader4.load('./models/enemy4.dae', function (collada) {
           model = collada.scene;
           model.children[1].children[1].material = lambertian_material;
-          model.raycastMaterial = lambertian_material;
+          model.children[1].children[1].hitpoints = 3;
         });
 
 
@@ -342,13 +348,14 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
+          dictionary[model] = 3;
         });
 
         var loader5 = new THREE.ColladaLoader(loadingManager5);
           loader5.load('./models/enemy5.dae', function (collada) {
           model = collada.scene;
           model.children[1].children[1].material = glass_material;
-          model.raycastMaterial = glass_material;
+          model.children[1].children[1].hitpoints = 3;
         });
 
 
@@ -359,13 +366,14 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
+          dictionary[model] = 3;
         });
 
         var loader6 = new THREE.ColladaLoader(loadingManager6);
           loader6.load('./models/enemy6.dae', function (collada) {
           model = collada.scene;
           model.children[1].children[1].material = glass_material;
-          model.raycastMaterial = glass_material;
+          model.children[1].children[1].hitpoints = 3;
         });
 
 
@@ -375,7 +383,7 @@
           model.position.y =  0;
           model.rotation.z += Math.PI / 2;
           scene.add(model);
-          objects.push(model);
+          chest = model;
           end_x = model.position.x;
           end_z = model.position.z;
         });
@@ -394,7 +402,7 @@
           model.position.y =  camera.position.y - .5;
           // model.rotation.z += Math.PI / 2;
           scene.add(model);
-          objects.push(model);
+          gun = model;
         });
 
         var loader8 = new THREE.ColladaLoader(loadingManager8);
@@ -435,6 +443,21 @@
           geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
           var line = new THREE.Line(geometry, material);
           scene.add(line);
+
+          if(intersects[0].object.hitpoints > 0) {
+            intersects[0].object.hitpoints--;
+            if (intersects[0].object.hitpoints === 0) {
+              for(var obj in objects) {
+                console.log(objects[obj]);
+                if(objects[obj].children[1] !== null)
+                  if(objects[obj].children[1].children[1] !== null)
+                    if(objects[obj].children[1].children[1] === intersects[0].object) {
+                      scene.remove(objects[obj]);
+                      objects.splice(obj, 1);
+                    }
+              }
+            }
+          }
           if(intersects[0].object.material == lambertian_material) {
             var newRay = diffuse(intersects[0], raycaster.ray);
             raycaster.set(newRay.origin, newRay.direction);
@@ -477,24 +500,23 @@
         return newRay;
       }
 
+      var set_win = false;
       var update = function() {
         //cube.rotation.x += 0.01;
         //cube.rotation.y += 0.005;
         
         //enemy.setGeometry();
-        if ((Math.round(camera.position.x)=== end_x) && (Math.round(camera.position.z) === end_z + 4)) {
-          alert("You win!");
-          location.reload();
+        if (Math.abs(Math.round(camera.position.x) - end_x) <= 5 && Math.abs(Math.round(camera.position.z) - end_z) <= 5) {
+          if(objects.length === 0 && !set_win) {
+            set_win = true;
+            alert("You win!");
+            location.reload();
+          }
         }
 
-        if (objects.length ===  8) {
-          var gun = objects[objects.length - 1];
-          scene.remove(gun);
-          gun.position.x = camera.position.x + 1;
-          gun.position.z = camera.position.z - 5;
-          gun.position.y =  camera.position.y - .5;
-          scene.add(gun);
-        }
+        gun.position.x = camera.position.x + 1;
+        gun.position.z = camera.position.z - 5;
+        gun.position.y =  camera.position.y - .5;
       };
 
       var render = function() {
