@@ -199,15 +199,19 @@
 
       var recurseRaycast = function(raycaster) {
         var intersects = raycaster.raycast(objects);
-        console.log('ray shot');
         if(intersects.length) {
           geometry = new THREE.Geometry();
           geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
           geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
           line = new THREE.Line(geometry, material);
           scene.add(line);
-          if(intersects[0].object.material == lambertian_material)
-            diffuse(intersects[0]);
+          if(intersects[0].object.material == lambertian_material) {
+            var newRay = diffuse(intersects[0], raycaster.ray);
+            raycaster.set(newRay.origin, newRay.direction);
+            var rr_end = Math.random();
+            if(rr_end < 0.95)
+              recurseRaycast(raycaster);
+          }
         } else {
           geometry = new THREE.Geometry();
           geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
@@ -217,25 +221,26 @@
         }
       }
 
-      var diffuse = function(i) {
-        var Xi1 = Math.random();
-        var Xi2 = Math.random();
+      var diffuse = function(i, ray) {
+        var theta0 = 2.0 * Math.PI * Math.random();
+        var theta1 = Math.acos(1 - 2 * Math.random());
 
-        var theta = Math.acos(Xi1);
-        var phi = 2.0 * Math.PI * Xi2;
+        var x_s = Math.sin(theta0) * Math.sin(theta1);
+        var y_s = Math.cos(theta0) * Math.sin(theta1);
+        var z_s = Math.cos(theta1);
 
-        var xs = Math.sin(theta) * Math.cos(phi) * 10;
-        var ys = Math.sin(theta) * Math.sin(phi) * 10;
-        var zs = Math.cos(theta) * 10;
-
-
-        var geometry2 = new THREE.Geometry();
-        geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
-        geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
-
-        var line2 = new THREE.Line(geometry2, material);
-        scene.add(line2);
-
+        var n = new THREE.Vector3();
+        n.copy(i.face.normal);
+        if(n.dot(ray.direction) >= 0)
+          n.negate();
+        var newDir = new THREE.Vector3(x_s, y_s, z_s);
+        var nextDir = new THREE.Vector3(x_s, y_s, z_s);
+        if(newDir.dot(n) >= 0)
+          nextDir.subVectors(nextDir, n.multiplyScalar(2 * newDir.dot(n) / n.dot(n)));
+        var newPoint = new THREE.Vector3();
+        newPoint.addVectors(i.point, n.multiplyScalar(0.001));
+        var newRay = new THREE.Ray(newPoint, nextDir);
+        return newRay;
       }
 
       var update = function() {

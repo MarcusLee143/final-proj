@@ -93,12 +93,15 @@ function intersectObjects(object, raycaster, ray, position, uv, a, b, c) {
   v3.fromBufferAttribute(position, c);
 
   var intersect;
-  if(object.material.side === 0)
+  if(object.material.side === 0) {
     intersect = intersectTriangle(ray, v1, v2, v3, true, intersectionPoint);
-  if(object.material.side === 1)
+  }
+  else if(object.material.side === 1) {
     intersect = intersectTriangle(ray, v3, v2, v1, true, intersectionPoint);
-  else
-    intersect = intersectTriangle(ray, v1, v2, v3, false, intersectionPoint);
+  }
+  else {
+    intersect = intersectTriangle(ray, v1, v2, v3, true, intersectionPoint);
+  }
   if(intersect === null)
     return null;
 
@@ -122,8 +125,8 @@ function intersectObjects(object, raycaster, ray, position, uv, a, b, c) {
     }
 
     var face = new THREE.Face3(a, b, c);
-    faceNormal.subVectors(c, b);
-    v0.subVectors(a, b);
+    faceNormal.subVectors(v3, v2);
+    v0.subVectors(v1, v2);
     faceNormal.cross(v0);
 
     if(faceNormal.length() > 0)
