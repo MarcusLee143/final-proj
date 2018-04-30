@@ -80,10 +80,36 @@
       var count = 0;
       var material = new THREE.LineBasicMaterial({linewidth:10, color: 0x0000ff});
       function changeRayGun() {
-        if (count % 2 === 0) {
-          material.color.setHex( 0xff0000 );
-        } else {
+
+        if (count > 3) {
+          count = 0;
+        }
+        if (count === 0) {
           material.color.setHex( 0x0000ff );
+          if (objects.length ===  8) {
+            var gun = objects[objects.length - 1];
+            gun.children[1].children[1].material = lambertian_material;
+            gun.raycastMaterial = lambertian_material;
+          }
+
+        } else if (count === 1) {
+          if (objects.length ===  8) {
+            var gun = objects[objects.length - 1];
+
+            gun.children[1].children[1].material = glass_material;
+            gun.raycastMaterial = glass_material;
+          }
+
+          material.color.setHex( 0x00ff00 );
+        } else {
+          if (objects.length ===  8) {
+            var gun = objects[objects.length - 1];
+
+            gun.children[1].children[1].material = mirror_material;
+            gun.raycastMaterial = mirror_material;
+          }
+
+          material.color.setHex( 0xff0000 );
         }
         count++;
       }
@@ -227,8 +253,8 @@
         var loader1 = new THREE.ColladaLoader(loadingManager1);
           loader1.load('./models/enemy1.dae', function (collada) {
           model = collada.scene;
-          model.children[1].children[1].material = lambertian_material;
-          model.raycastMaterial = lambertian_material;
+          model.children[1].children[1].material = mirror_material;
+          model.raycastMaterial = mirror_material;
         });
 
 
@@ -244,8 +270,8 @@
         var loader2 = new THREE.ColladaLoader(loadingManager2);
           loader2.load('./models/enemy2.dae', function (collada) {
           model = collada.scene;
-          model.children[1].children[1].material = lambertian_material;
-          model.raycastMaterial = lambertian_material;
+          model.children[1].children[1].material = mirror_material;
+          model.raycastMaterial = mirror_material;
         });
 
 
@@ -293,8 +319,8 @@
         var loader5 = new THREE.ColladaLoader(loadingManager5);
           loader5.load('./models/enemy5.dae', function (collada) {
           model = collada.scene;
-          model.children[1].children[1].material = lambertian_material;
-          model.raycastMaterial = lambertian_material;
+          model.children[1].children[1].material = glass_material;
+          model.raycastMaterial = glass_material;
         });
 
 
@@ -310,8 +336,8 @@
         var loader6 = new THREE.ColladaLoader(loadingManager6);
           loader6.load('./models/enemy6.dae', function (collada) {
           model = collada.scene;
-          model.children[1].children[1].material = lambertian_material;
-          model.raycastMaterial = lambertian_material;
+          model.children[1].children[1].material = glass_material;
+          model.raycastMaterial = glass_material;
         });
 
 
