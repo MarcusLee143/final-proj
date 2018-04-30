@@ -39,6 +39,22 @@
 
         cursor: pointer;
       }
+
+
+
+      .button {
+        position:fixed;
+        width:60px;
+        height:60px;
+        bottom:40px;
+        right:40px;
+        background-color:#0C9;
+        color:#FFF;
+        border-radius:50px;
+        text-align:center;
+        box-shadow: 2px 2px 3px #999;
+      }
+
     </style>
   </head>
 
@@ -51,16 +67,63 @@
     <script src="js/enemy.js"></script>
     <script src="js/player.js"></script>
 
+
+
+    <button class="button" onclick="changeRayGun()">
+    </button>
+
+
+
+    <script type="text/javascript"> document.addEventListener('click', function(e) { if(document.activeElement.toString() == '[object HTMLButtonElement]'){ document.activeElement.blur(); } }); </script>
+
     <script>
+      var count = 0;
+      var material = new THREE.LineBasicMaterial({linewidth:10, color: 0x0000ff});
+      function changeRayGun() {
+
+        if (count > 3) {
+          count = 0;
+        }
+        if (count === 0) {
+          material.color.setHex( 0x0000ff );
+          if (objects.length ===  8) {
+            var gun = objects[objects.length - 1];
+            gun.children[1].children[1].material = lambertian_material;
+            gun.raycastMaterial = lambertian_material;
+          }
+
+        } else if (count === 1) {
+          if (objects.length ===  8) {
+            var gun = objects[objects.length - 1];
+
+            gun.children[1].children[1].material = glass_material;
+            gun.raycastMaterial = glass_material;
+          }
+
+          material.color.setHex( 0x00ff00 );
+        } else {
+          if (objects.length ===  8) {
+            var gun = objects[objects.length - 1];
+
+            gun.children[1].children[1].material = mirror_material;
+            gun.raycastMaterial = mirror_material;
+          }
+
+          material.color.setHex( 0xff0000 );
+        }
+        count++;
+      }
+
+
       var scene = new THREE.Scene();
       // scene.background = new THREE.Color(0xffffff);
       scene.background = new THREE.CubeTextureLoader().load( [
-                                                      'textures/UnionSquare/posx.jpg',
-                                                      'textures/UnionSquare/negx.jpg',
-                                                      'textures/UnionSquare/posy.jpg',
-                                                      'textures/UnionSquare/negy.jpg',
-                                                      'textures/UnionSquare/posz.jpg',
-                                                      'textures/UnionSquare/negz.jpg'
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg',
+                                                      'textures/stars.jpg'
                                                     ] );
 
 
@@ -90,12 +153,32 @@
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
       });
-
+      
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       //controls = new THREE.FirstPersonControls(camera, renderer.domElement);
 
       var lambertian_material = new THREE.MeshLambertMaterial({color: 0xff0000});
       var glossy_material = new THREE.MeshPhysicalMaterial({color: 0x00ff00});
+      var mirror_material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        envMap: scene.background
+      } );
+
+      var glass_texture = new THREE.CubeTextureLoader().load( [
+                                                      'textures/UnionSquare/posx.jpg',
+                                                      'textures/UnionSquare/negx.jpg',
+                                                      'textures/UnionSquare/posy.jpg',
+                                                      'textures/UnionSquare/negy.jpg',
+                                                      'textures/UnionSquare/posz.jpg',
+                                                      'textures/UnionSquare/negz.jpg'
+                                                    ] );
+      glass_texture.mapping = THREE.CubeRefractionMapping;
+      var glass_material = new THREE.MeshBasicMaterial( {
+        color: 0xffffff,
+        envMap: glass_texture,
+        refractionRatio: 0.9
+      } );
+      
 
       var objects = [];
 
@@ -106,83 +189,218 @@
         objects.push(model);
       });
 
-      var loader = new THREE.ColladaLoader(loadingManager);
-      loader.load('./models/gun.dae', function (collada) {
-        model = collada.scene;
-        model.children[1].children[1].material = lambertian_material;
-      });
+      var end_x;
+      var end_z;
 
-      var loadingManager2 = new THREE.LoadingManager(function() {
-        scene.add(model);
-        objects.push(model);
-      });
-
-      var loader2 = new THREE.ColladaLoader(loadingManager2);
-      loader2.load('./models/figure.dae', function (collada) {
-        model = collada.scene;
-        model.children[1].material = lambertian_material;
-      });
-
-      var loadingManager3 = new THREE.LoadingManager(function() {
-        model.position.x -= 10;
-        scene.add(model);
-        objects.push(model);
-      });
-
-      var loader3 = new THREE.ColladaLoader(loadingManager3);
-      loader3.load('./models/enemy1.dae', function (collada) {
-        model = collada.scene;
-        model.children[1].children[1].material = lambertian_material;
-      });
-
-      var loadingManager4 = new THREE.LoadingManager(function() {
-        model.position.x += 10;
-        model.position.y += 10;
-        model.rotation.z += Math.PI / 2;
-        scene.add(model);
-        objects.push(model);
-      });
-
-      var loader4 = new THREE.ColladaLoader(loadingManager4);
-      loader4.load('./models/gun2.dae', function (collada) {
-        model = collada.scene;
-        model.children[1].children[1].material = glossy_material;
-      });
-
-      var loadingManager5 = new THREE.LoadingManager(function() {
-        model.position.y += 10;
-        model.rotation.z += Math.PI / 2;
-        scene.add(model);
-        objects.push(model);
-      });
-
-      var loader5 = new THREE.ColladaLoader(loadingManager5);
-      loader5.load('./models/chest.dae', function (collada) {
-        model = collada.scene;
-        model.children[2].material = glossy_material;
-      });
-
-      var loadingManager6 = new THREE.LoadingManager(function() {
-        model.position.x -= 10;
-        model.position.y += 10;
-        scene.add(model);
-        objects.push(model);
-      });
-
-      var loader6 = new THREE.ColladaLoader(loadingManager6);
-      loader6.load('./models/potion.dae', function (collada) {
-        model = collada.scene;
-        model.children[2].material = glossy_material;
-      });
+      var arena = function (N) {
+        var floorGeometry = new THREE.CubeGeometry(N, 1, N);
+        var floorMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var floorCube = new THREE.Mesh(floorGeometry, floorMaterial);
+        floorCube.position.y = -1;
       
+        scene.add(floorCube);
 
-      //var enemy = new THREE.EnemyPrefab(scene);
+        var leftWallGeometry = new THREE.CubeGeometry(1, N/4, N);
+        var leftWallMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var leftWallCube = new THREE.Mesh(leftWallGeometry, leftWallMaterial);
+        leftWallCube.position.x = -N/2;
+        leftWallCube.position.y = N/8-1;
+        scene.add(leftWallCube);
 
-      camera.position.z = 10;
+        var rightWallGeometry = new THREE.CubeGeometry(1, N/4, N);
+        var rightWallMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var rightWallCube = new THREE.Mesh(rightWallGeometry, rightWallMaterial);
+        rightWallCube.position.x = N/2;
+        rightWallCube.position.y =  N/8-1;
+
+        scene.add(rightWallCube);
+
+        var rearWallGeometry = new THREE.CubeGeometry(N, N/4, 1);
+        var rearWallMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var rearWallCube = new THREE.Mesh(rearWallGeometry, rearWallMaterial);
+        rearWallCube.position.y =  N/8-1;
+        rearWallCube.position.z = -N/2;
+        scene.add(rearWallCube);
+
+        var frontWallGeometry = new THREE.CubeGeometry(N, N/4, 1);
+        var frontWallMaterial = new THREE.MeshLambertMaterial({map: new THREE.TextureLoader().load("textures/metal.png"), side: THREE.DoubleSide});
+        var frontWallCube = new THREE.Mesh(frontWallGeometry, frontWallMaterial);
+        frontWallCube.position.y =  N/8-1;
+        frontWallCube.position.z = N/2;
+        scene.add(frontWallCube);
+
+
+        camera.position.z = N/2-1;
+        camera.position.y = 4;
+        
+
+
+        var loadingManager1 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader1 = new THREE.ColladaLoader(loadingManager1);
+          loader1.load('./models/enemy1.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = mirror_material;
+          model.raycastMaterial = mirror_material;
+        });
+
+
+
+        var loadingManager2 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader2 = new THREE.ColladaLoader(loadingManager2);
+          loader2.load('./models/enemy2.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = mirror_material;
+          model.raycastMaterial = mirror_material;
+        });
+
+
+         var loadingManager3 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader3 = new THREE.ColladaLoader(loadingManager3);
+          loader3.load('./models/enemy3.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+
+
+
+        var loadingManager4 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader4 = new THREE.ColladaLoader(loadingManager4);
+          loader4.load('./models/enemy4.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+
+
+         var loadingManager5 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader5 = new THREE.ColladaLoader(loadingManager5);
+          loader5.load('./models/enemy5.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = glass_material;
+          model.raycastMaterial = glass_material;
+        });
+
+
+
+        var loadingManager6 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  4;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader6 = new THREE.ColladaLoader(loadingManager6);
+          loader6.load('./models/enemy6.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = glass_material;
+          model.raycastMaterial = glass_material;
+        });
+
+
+        var loadingManager7 = new THREE.LoadingManager(function() {
+          model.position.x = Math.floor(Math.random() * ((N/2 - 5)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.z = Math.floor(Math.random() * ((N/2 -15)- (-N/2+5) + 1)) + (-N/2+5);
+          model.position.y =  0;
+          model.rotation.z += Math.PI / 2;
+          scene.add(model);
+          objects.push(model);
+          end_x = model.position.x;
+          end_z = model.position.z;
+        });
+
+        var loader7 = new THREE.ColladaLoader(loadingManager7);
+        loader7.load('./models/chest.dae', function (collada) {
+          model = collada.scene;
+          model.children[2].material = glossy_material;
+          model.raycastMaterial = glossy_material;
+        });
+
+
+        var loadingManager8 = new THREE.LoadingManager(function() {
+          model.position.x = camera.position.x + .05;
+          model.position.z = camera.position.z - 5;
+          model.position.y =  camera.position.y - .5;
+          // model.rotation.z += Math.PI / 2;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader8 = new THREE.ColladaLoader(loadingManager8);
+        loader8.load('./models/gun.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
+      }
+
+      arena(60);
+
+
+      var diffuse = function(i) {
+      	var Xi1 = Math.random();
+  		  var Xi2 = Math.random();
+
+  		  var theta = Math.acos(Xi1);
+  		  var phi = 2.0 * Math.PI * Xi2;
+
+  		  var xs = Math.sin(theta) * Math.cos(phi) * 10;
+  		  var ys = Math.sin(theta) * Math.sin(phi) * 10;
+  		  var zs = Math.cos(theta) * 10;
+
+
+  		  var geometry2 = new THREE.Geometry();
+        geometry2.vertices.push(new THREE.Vector3( i.point.x, i.point.y, i.point.z) );
+        geometry2.vertices.push(new THREE.Vector3(xs, ys, zs));
+
+        var line2 = new THREE.Line(geometry2, material);
+        scene.add(line2);
+
+        setTimeout(function() {
+          console.log("yoooooooo");
+          scene.remove(line2);
+        }, 1000);
+
+      }
 
       var raycaster = new THREE.ColladaRaycaster();
       var directionVector = new THREE.Vector3();
-      var material = new THREE.LineBasicMaterial({linewidth:10, color: 0x0000ff});
       var geometry;
 
       window.onkeydown = function(event) {
@@ -201,13 +419,24 @@
         var intersects = raycaster.raycast(objects);
         console.log('ray shot');
         if(intersects.length) {
+          if (typeof line !== 'undefined') {
+            scene.remove(line);
+          }
           geometry = new THREE.Geometry();
-          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
+          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x + .02, raycaster.ray.origin.y, raycaster.ray.origin.z));
           geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
+
+
+
+
           line = new THREE.Line(geometry, material);
           scene.add(line);
-          if(intersects[0].object.material == lambertian_material)
-            diffuse(intersects[0]);
+
+
+          diffuse(intersects[0]);
+          setTimeout(function() {
+            scene.remove(line);
+          }, 1200);
         } else {
           geometry = new THREE.Geometry();
           geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
@@ -243,6 +472,19 @@
         //cube.rotation.y += 0.005;
         
         //enemy.setGeometry();
+        if ((Math.round(camera.position.x)=== end_x) && (Math.round(camera.position.z) === end_z + 4)) {
+          location.reload();
+        }
+
+
+        if (objects.length ===  8) {
+          var gun = objects[objects.length - 1];
+          scene.remove(gun);
+          gun.position.x = camera.position.x + 1;
+          gun.position.z = camera.position.z - 5;
+          gun.position.y =  camera.position.y - .5;
+          scene.add(gun);
+        }
       };
 
       var render = function() {
