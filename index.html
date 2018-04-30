@@ -332,6 +332,23 @@
           model.children[2].material = glossy_material;
           model.raycastMaterial = glossy_material;
         });
+
+
+        var loadingManager8 = new THREE.LoadingManager(function() {
+          model.position.x = camera.position.x + .05;
+          model.position.z = camera.position.z - 5;
+          model.position.y =  camera.position.y - .5;
+          // model.rotation.z += Math.PI / 2;
+          scene.add(model);
+          objects.push(model);
+        });
+
+        var loader8 = new THREE.ColladaLoader(loadingManager8);
+        loader8.load('./models/gun.dae', function (collada) {
+          model = collada.scene;
+          model.children[1].children[1].material = lambertian_material;
+          model.raycastMaterial = lambertian_material;
+        });
       }
 
       arena(60);
@@ -357,6 +374,11 @@
         var line2 = new THREE.Line(geometry2, material);
         scene.add(line2);
 
+        setTimeout(function() {
+          console.log("yoooooooo");
+          scene.remove(line2);
+        }, 1000);
+
       }
 
       var raycaster = new THREE.ColladaRaycaster();
@@ -379,12 +401,25 @@
         var intersects = raycaster.raycast(objects);
         console.log('ray shot');
         if(intersects.length) {
+          if (typeof line !== 'undefined') {
+            scene.remove(line);
+          }
           geometry = new THREE.Geometry();
-          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x, raycaster.ray.origin.y, raycaster.ray.origin.z));
+          geometry.vertices.push(new THREE.Vector3(raycaster.ray.origin.x + .02, raycaster.ray.origin.y, raycaster.ray.origin.z));
           geometry.vertices.push(new THREE.Vector3(intersects[0].point.x, intersects[0].point.y, intersects[0].point.z));
+
+
+
+
           line = new THREE.Line(geometry, material);
           scene.add(line);
+
+
+
           diffuse(intersects[0]);
+          setTimeout(function() {
+            scene.remove(line);
+          }, 1200);
         } else {
 
         }
@@ -395,11 +430,18 @@
         //cube.rotation.y += 0.005;
         
         //enemy.setGeometry();
-
-        console.log(Math.floor(camera.position.x));
-        console.log(end_x);
         if ((Math.round(camera.position.x)=== end_x) && (Math.round(camera.position.z) === end_z + 4)) {
           location.reload();
+        }
+
+
+        if (objects.length ===  8) {
+          var gun = objects[objects.length - 1];
+          scene.remove(gun);
+          gun.position.x = camera.position.x + 1;
+          gun.position.z = camera.position.z - 5;
+          gun.position.y =  camera.position.y - .5;
+          scene.add(gun);
         }
       };
 
