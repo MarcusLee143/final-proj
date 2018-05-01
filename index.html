@@ -440,8 +440,14 @@
               }
             }
           }
-          if(intersects[0].object.material == lambertian_material) {
-            var newRay = diffuse(intersects[0], raycaster.ray);
+          if(intersects[0].object.material === lambertian_material && intersects[0].object.material !== gun.children[1].children[1].material) {
+            var newRay = diffuse_intersect(intersects[0], raycaster.ray);
+            raycaster.set(newRay.origin, newRay.direction);
+            var rr_end = Math.random();
+            if(rr_end < 0.95)
+              recurseRaycast(raycaster);
+          } else if(intersects[0].object.material === glass_material && intersects[0].object.material !== gun.children[1].children[1].material) {
+            var newRay = glass_intersect(intersects[0], raycaster.ray);
             raycaster.set(newRay.origin, newRay.direction);
             var rr_end = Math.random();
             if(rr_end < 0.95)
@@ -460,7 +466,7 @@
         }, 1200);
       }
 
-      var diffuse = function(i, ray) {
+      var diffuse_intersect = function(i, ray) {
         var theta0 = 2.0 * Math.PI * Math.random();
         var theta1 = Math.acos(1 - 2 * Math.random());
 
@@ -479,6 +485,20 @@
         var newPoint = new THREE.Vector3();
         newPoint.addVectors(i.point, n.multiplyScalar(0.001));
         var newRay = new THREE.Ray(newPoint, nextDir);
+        return newRay;
+      }
+
+      var glass_intersect = function(i, ray) {
+        var n = new THREE.Vector3();
+        n.copy(i.face.normal);
+        if(n.dot(ray.direction) >= 0)
+          n.negate();
+        var newDir = new THREE.Vector3();
+        newDir.copy(ray.direction);
+        var nextDir = new THREE.Vector3();
+        nextDir.copy(ray.direction);
+        nextDir.subVectors(nextDir, n.multiplyScalar(2 * nextDir.dot(n)));
+        var newRay = new THREE.Ray(i.point, nextDir);
         return newRay;
       }
 
