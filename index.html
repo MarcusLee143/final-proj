@@ -121,28 +121,14 @@
         }
         if (count === 0) {
           material.color.setHex( 0x0000ff );
-          if (objects.length ===  8) {
-            var gun = objects[objects.length - 1];
-            gun.children[1].children[1].material = lambertian_material;
-            gun.raycastMaterial = lambertian_material;
-          }
+          gun.children[1].children[1].material = lambertian_material;
 
         } else if (count === 1) {
-          if (objects.length ===  8) {
-            var gun = objects[objects.length - 1];
-
-            gun.children[1].children[1].material = glass_material;
-            gun.raycastMaterial = glass_material;
-          }
+          gun.children[1].children[1].material = glass_material;
 
           material.color.setHex( 0x00ff00 );
         } else {
-          if (objects.length ===  8) {
-            var gun = objects[objects.length - 1];
-
-            gun.children[1].children[1].material = mirror_material;
-            gun.raycastMaterial = mirror_material;
-          }
+          gun.children[1].children[1].material = mirror_material;
 
           material.color.setHex( 0xff0000 );
         }
@@ -278,7 +264,6 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
-          dictionary[model] = 3;
         });
 
         var loader1 = new THREE.ColladaLoader(loadingManager1);
@@ -296,7 +281,6 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
-          dictionary[model] = 3;
         });
 
         var loader2 = new THREE.ColladaLoader(loadingManager2);
@@ -313,7 +297,6 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
-          dictionary[model] = 3;
         });
 
         var loader3 = new THREE.ColladaLoader(loadingManager3);
@@ -331,7 +314,6 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
-          dictionary[model] = 3;
         });
 
         var loader4 = new THREE.ColladaLoader(loadingManager4);
@@ -348,7 +330,6 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
-          dictionary[model] = 3;
         });
 
         var loader5 = new THREE.ColladaLoader(loadingManager5);
@@ -366,7 +347,6 @@
           model.position.y =  4;
           scene.add(model);
           objects.push(model);
-          dictionary[model] = 3;
         });
 
         var loader6 = new THREE.ColladaLoader(loadingManager6);
@@ -430,6 +410,9 @@
           raycaster.set(camera.position, directionVector);
           recurseRaycast(raycaster);
         }
+        else if(event.keyCode === 17) {
+          changeRayGun();
+        }
       }
 
       var recurseRaycast = function(raycaster) {
@@ -444,11 +427,10 @@
           var line = new THREE.Line(geometry, material);
           scene.add(line);
 
-          if(intersects[0].object.hitpoints > 0) {
+          if(intersects[0].object.hitpoints > 0 && intersects[0].object.material === gun.children[1].children[1].material) {
             intersects[0].object.hitpoints--;
             if (intersects[0].object.hitpoints === 0) {
               for(var obj in objects) {
-                console.log(objects[obj]);
                 if(objects[obj].children[1] !== null)
                   if(objects[obj].children[1].children[1] !== null)
                     if(objects[obj].children[1].children[1] === intersects[0].object) {
